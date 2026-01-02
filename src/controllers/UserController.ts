@@ -2,6 +2,7 @@ import { Handler } from "express";
 import { hash } from "bcryptjs";
 import prisma from "../prisma/prisma";
 import { HttpError } from "../errors/HttpError";
+import { CreateUserService } from "../services/user/CreateUserService";
 
 export class UserController {
   index: Handler = async (req, res, next) => {
@@ -35,17 +36,13 @@ export class UserController {
   create: Handler = async (req, res, next) => {
     try {
       const { name, email, password } = req.body;
-      const userExists = await prisma.user.findUnique({ where: { email } });
 
-      if (userExists) {
-        throw new HttpError(400, "Este email já está em uso.");
-      }
+      const createUser = new CreateUserService();
 
-      const passwordHash = await hash(password, 8);
-
-      const newUser = await prisma.user.create({
-        data: { name, email, password: passwordHash },
-        select: { id: true, name: true, email: true, createdAt: true },
+      const newUser = await createUser.execute({
+        name,
+        email,
+        password,
       });
 
       res.status(201).json(newUser);
