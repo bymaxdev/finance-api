@@ -3,6 +3,7 @@ import { hash } from "bcryptjs";
 import prisma from "../prisma/prisma";
 import { HttpError } from "../errors/HttpError";
 import { CreateUserService } from "../services/user/CreateUserService";
+import { UpdateUserService } from "../services/user/UpdateUserService";
 
 export class UserController {
   index: Handler = async (req, res, next) => {
@@ -55,38 +56,16 @@ export class UserController {
     try {
       const { id } = req.params;
       const { name, email, password } = req.body;
-      const userExists = await prisma.user.findUnique({ where: { id } });
 
-      if (!userExists) {
-        throw new HttpError(404, "Este ID não existe.");
-      }
-
-      if (email && email !== userExists.email) {
-        const emailExists = await prisma.user.findUnique({ where: { email } });
-        if (emailExists) {
-          throw new HttpError(400, "Este email já existe.");
-        }
-      }
-
-      let passwordHash;
-      if (password) {
-        passwordHash = await hash(password, 8);
-      }
-
-      const updateUser = await prisma.user.update({
-        where: { id },
-        data: { name, email, password: passwordHash || undefined },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          active: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+      const updateUser = new UpdateUserService();
+      const updatedUser = await updateUser.execute({
+        id,
+        name,
+        email,
+        password,
       });
 
-      res.json(updateUser);
+      res.json(updatedUser);
     } catch (error) {
       next(error);
     }
