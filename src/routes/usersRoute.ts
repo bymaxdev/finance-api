@@ -10,6 +10,6 @@ router.get("/users", userController.index);
 router.get("/users/:id", userController.show);
 router.post("/users", validate(UserSchema), userController.create);
 router.patch("/users/:id", userController.update);
-router.patch("/users/:id", userController.delete);
+router.delete("/users/:id", userController.delete);
 
 export { router };

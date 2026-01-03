@@ -1,15 +1,15 @@
 import { Handler } from "express";
-import { hash } from "bcryptjs";
 import prisma from "../prisma/prisma";
 import { HttpError } from "../errors/HttpError";
 import { CreateUserService } from "../services/user/CreateUserService";
 import { UpdateUserService } from "../services/user/UpdateUserService";
+import { DeleteUserService } from "../services/user/DeleteUserSevice";
 
 export class UserController {
   index: Handler = async (req, res, next) => {
     try {
       const users = await prisma.user.findMany({
-        select: { id: true, name: true, email: true, active: true },
+        select: { id: true, name: true, email: true, isActive: true },
       });
       res.json(users);
     } catch (error) {
@@ -74,31 +74,13 @@ export class UserController {
   delete: Handler = async (req, res, next) => {
     try {
       const { id } = req.params;
-      const user = await prisma.user.findUnique({
-        where: { id },
+
+      const desactiveUser = new DeleteUserService();
+      const desactivedUser = await desactiveUser.execute({
+        id,
       });
 
-      if (!user) {
-        throw new HttpError(404, "ID não encontrado.");
-      }
-
-      if (user.active === false) {
-        throw new HttpError(400, "Este usuário já está desativado.");
-      }
-
-      const desactiveUser = await prisma.user.update({
-        where: { id },
-        data: { active: false },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          active: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-      res.json(desactiveUser);
+      res.json(desactivedUser);
     } catch (error) {
       next(error);
     }
