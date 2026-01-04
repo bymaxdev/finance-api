@@ -1,16 +1,16 @@
 import { Handler } from "express";
-import prisma from "../prisma/prisma";
-import { HttpError } from "../errors/HttpError";
-import { CreateUserService } from "../services/user/CreateUserService";
-import { UpdateUserService } from "../services/user/UpdateUserService";
-import { DeleteUserService } from "../services/user/DeleteUserSevice";
+import { UserService } from "../services/UserService";
 
 export class UserController {
+  private userService: UserService;
+
+  constructor() {
+    this.userService = new UserService();
+  }
+
   index: Handler = async (req, res, next) => {
     try {
-      const users = await prisma.user.findMany({
-        select: { id: true, name: true, email: true, isActive: true },
-      });
+      const users = await this.userService.list();
       res.json(users);
     } catch (error) {
       next(error);
@@ -20,15 +20,8 @@ export class UserController {
   show: Handler = async (req, res, next) => {
     try {
       const { id } = req.params;
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: { id: true, name: true, email: true },
-      });
-
-      if (!user) {
-        throw new HttpError(404, "ID não encontrado.");
-      }
-      res.json(user);
+      const findById = await this.userService.findById(id);
+      res.json(findById);
     } catch (error) {
       next(error);
     }
@@ -36,16 +29,7 @@ export class UserController {
 
   create: Handler = async (req, res, next) => {
     try {
-      const { name, email, password } = req.body;
-
-      const createUser = new CreateUserService();
-
-      const newUser = await createUser.execute({
-        name,
-        email,
-        password,
-      });
-
+      const newUser = await this.userService.create(req.body);
       res.status(201).json(newUser);
     } catch (error) {
       next(error);
@@ -55,16 +39,7 @@ export class UserController {
   update: Handler = async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { name, email, password } = req.body;
-
-      const updateUser = new UpdateUserService();
-      const updatedUser = await updateUser.execute({
-        id,
-        name,
-        email,
-        password,
-      });
-
+      const updatedUser = await this.userService.update({ id, ...req.body });
       res.json(updatedUser);
     } catch (error) {
       next(error);
@@ -74,12 +49,7 @@ export class UserController {
   delete: Handler = async (req, res, next) => {
     try {
       const { id } = req.params;
-
-      const desactiveUser = new DeleteUserService();
-      const desactivedUser = await desactiveUser.execute({
-        id,
-      });
-
+      const desactivedUser = await this.userService.delete(id);
       res.json(desactivedUser);
     } catch (error) {
       next(error);
