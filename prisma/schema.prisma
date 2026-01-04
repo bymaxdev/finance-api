@@ -14,7 +14,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  isActive  Boolean  @default(true)
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -51,17 +51,20 @@ model Account {
 }
 
 model Transaction {
-  id            String   @id @default(uuid())
-  title         String
-  amount        Decimal
-  type          String // INCOME, EXPENSE, TRANSFER
-  date          DateTime @default(now())
-  isPaid        Boolean  @default(false)
+  id     String   @id @default(uuid())
+  title  String
+  amount Decimal
+  type   String // INCOME, EXPENSE, TRANSFER
+  date   DateTime @default(now())
+  isPaid Boolean  @default(false)
+
+  // Para transferências (opcional)
   fromAccountId String?
   toAccountId   String?
 
+  // Conta principal da transação
   accountId String
-  account   Account @relation(fields: [accountId], references: [id], name: "accountRelation")
+  account   Account @relation(fields: [accountId], references: [id])
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])

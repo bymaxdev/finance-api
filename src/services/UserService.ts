@@ -18,7 +18,7 @@ interface UpdateUserRequest {
 export class UserService {
   async list() {
     const users = await prisma.user.findMany({
-      select: { id: true, name: true, email: true, isActive: true },
+      select: { id: true, name: true, email: true, active: true },
     });
     return users;
   }
@@ -26,7 +26,7 @@ export class UserService {
   async findById(id: string) {
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, isActive: true },
+      select: { id: true, name: true, email: true, active: true },
     });
 
     if (!user) {
@@ -57,7 +57,7 @@ export class UserService {
         id: true,
         name: true,
         email: true,
-        isActive: true,
+        active: true,
         createdAt: true,
       },
     });
@@ -91,7 +91,7 @@ export class UserService {
         id: true,
         name: true,
         email: true,
-        isActive: true,
+        active: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -115,12 +115,12 @@ export class UserService {
 
     const desactiveUser = await prisma.user.update({
       where: { id },
-      data: { isActive: false },
+      data: { active: false },
       select: {
         id: true,
         name: true,
         email: true,
-        isActive: true,
+        active: true,
         createdAt: true,
         updatedAt: true,
       },
