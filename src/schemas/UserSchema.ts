@@ -1,4 +1,3 @@
-// src/schemas/user.schema.ts
 import { z } from "zod";
 
 export const CreateUserSchema = z.object({
@@ -8,6 +7,7 @@ export const CreateUserSchema = z.object({
 });
 
 export const UpdateUserSchema = z.object({
+  id: z.string(),
   name: z.string().min(3).optional(),
   email: z.email().optional(),
   password: z.string().min(6).optional(),
@@ -18,7 +18,15 @@ export const LoginSchema = z.object({
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
+export const UserResponse = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  active: z.boolean(),
+});
+
 // Tipos TypeScript gerados automaticamente
 export type CreateUserSchema = z.infer<typeof CreateUserSchema>;
 export type UpdateUserSchema = z.infer<typeof UpdateUserSchema>;
 export type LoginSchema = z.infer<typeof LoginSchema>;
+export type UserResponse = z.infer<typeof UserResponse>;

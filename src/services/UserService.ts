@@ -1,19 +1,7 @@
 import { hash } from "bcryptjs";
 import { HttpError } from "../errors/HttpError";
 import prisma from "../prisma/prisma";
-
-interface CreateUserRequest {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface UpdateUserRequest {
-  id: string;
-  name: string | undefined;
-  email: string | undefined;
-  password: string | undefined;
-}
+import { CreateUserSchema, UpdateUserSchema } from "../schemas/UserSchema";
 
 export class UserService {
   async list() {
@@ -36,7 +24,7 @@ export class UserService {
     return user;
   }
 
-  async create({ name, email, password }: CreateUserRequest) {
+  async create({ name, email, password }: CreateUserSchema) {
     const userAlreadyExists = await prisma.user.findUnique({
       where: { email },
     });
@@ -65,7 +53,7 @@ export class UserService {
     return user;
   }
 
-  async update({ id, name, email, password }: UpdateUserRequest) {
+  async update({ id, name, email, password }: UpdateUserSchema) {
     const userAlreadyExists = await prisma.user.findUnique({ where: { id } });
 
     if (!userAlreadyExists) {
